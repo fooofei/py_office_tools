@@ -2,7 +2,7 @@
 
 import struct
 import olefile
-from  io_in_out import *
+from  io_in_out import io_text_arg
 
 
 def get_office_10native_stream(olefileio_obj):
@@ -94,9 +94,9 @@ def escape_office_10native_from_buffer(stream_buffer):
     data = data[4:]
 
     # (filename, <fullpath before put in ole>,<fullpath to write from ole>,data)
-    filename = io_in_arg(filename)
-    fullpath_original = io_in_arg(src_path)
-    fullpath_dst = io_in_arg(dst_path)
+    filename = io_text_arg(filename)
+    fullpath_original = io_text_arg(src_path)
+    fullpath_dst = io_text_arg(dst_path)
     return (filename, fullpath_original, fullpath_dst, data[0:actual_size])
 
 

@@ -3,6 +3,9 @@
 https://bitbucket.org/decalage/oletools/downloads
 https://bitbucket.org/decalage/oletools/wiki/olevba
 pip install oletools
+
+support python2.7
+
 '''
 
 # ------------------------------------------------------------------------------
@@ -23,9 +26,16 @@ import sys
 
 curpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.abspath(os.path.join(curpath, '../')))
-from io_in_out import *
+from io_in_out import io_text_arg
+from io_in_out import io_is_path_valid
+from io_in_out import io_sys_stdout
+from io_in_out import io_hash_stream
+from io_in_out import io_hash_memory
+from io_in_out import io_print
+from io_in_out import io_files_from_arg
+from io_in_out import io_path_format
 
-curpath = io_in_arg(curpath)
+curpath = io_text_arg(curpath)
 
 
 def dump_sub_file(host_fullpath, filename_from_host, data_or_fileobj_to_write):
@@ -84,8 +94,8 @@ def extract_macros_from_office2003(fullpath, fileobj=None):
                     b = os.path.basename(subfullpath)
                     vba_filename += u'.vba'
                     sub = (
-                        io_in_arg(fullpath),
-                        io_in_arg(vba_filename if a == b else u'{0}_{1}'.format(b, vba_filename)),
+                        io_text_arg(fullpath),
+                        io_text_arg(vba_filename if a == b else u'{0}_{1}'.format(b, vba_filename)),
                         vba_code
                     )
                     r.append(sub)
@@ -127,7 +137,7 @@ def extract_office2003_from_unknown_office(fullpath, fileobj=None):
                     if magic == olefile.MAGIC:
                         r.append(
                             (fullpath,
-                             io_in_arg(subfile),
+                             io_text_arg(subfile),
                              io.BytesIO(z.open(subfile).read()))
                         )
     else:
@@ -175,7 +185,7 @@ def _extract_attachment_from_attachment(attachment, depth, results):
     from base64_to_office import decode_mso_to_office, is_mso_buffer
 
     fn = attachment.get_filename()
-    fn = io_in_arg(fn)
+    fn = io_text_arg(fn)
     if fn is None:
         v = attachment.get(u'Content-Location', None)
         if v:
@@ -237,7 +247,7 @@ def extract_attachment_from_msg(fullpath):
     for attachment in msg.attachments:
         name = attachment.longFilename
         # name = u'{0}_{1}'.format(fullpath, name)
-        r.append((fullpath, io_in_arg(name), attachment.data))
+        r.append((fullpath, io_text_arg(name), attachment.data))
     return r
 
 
@@ -250,12 +260,15 @@ def dump_framework(files, pfn_extract):
         io_sys_stdout(u'->')
         try:
             r = pfn_extract(e)
-            map(lambda ev: dump_sub_file(*ev), r)
-            c_ok += 1
-            io_print('')
-        except Exception as e:
+            if r:
+                map(lambda ev: dump_sub_file(*ev), r)
+                c_ok += 1
+                io_print('')
+            else:
+                c_fail+=1
+        except Exception as er:
             c_fail += 1
-            io_print(u'fail,{}'.format(repr(e)))
+            io_print(u'fail,{}'.format(repr(er)))
 
     io_print(u'[+] ok {} fail {}'.format(c_ok, c_fail))
 
@@ -316,5 +329,5 @@ def entry():
 
 
 if __name__ == '__main__':
-    # unit_test()
+    #unit_test()
     entry()
